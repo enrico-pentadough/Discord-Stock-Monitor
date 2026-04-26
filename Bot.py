@@ -31,7 +31,7 @@ async def check_stocks():
         symbol = entry["variable1"]
         buy_price = float(entry["variable2"])
 
-        stock = get_stock_price(symbol)
+        stock = await get_stock_price(symbol)
         if not stock:
             continue
 
