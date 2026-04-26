@@ -4,25 +4,14 @@ import json
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
+from utils import load_data, save_data, send_embed, send_embed_to_saved_users
+
+#THIS PART OF THE CODE HANDLES THE BOT INTERACTING WITH USER WITH SAVE REQUESTS AND DELETE REQUESTS
 
 #imports tokens and IDs from .env file
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 ID = os.getenv("GUILD_ID")
-
-#Creates data file to store input
-DATA_FILE = "data.json"
-#Loads data file entries
-def load_data():
-    if not os.path.exists(DATA_FILE):
-        return {}
-    with open(DATA_FILE, "r") as f:
-        return json.load(f)
-#Saves data file entries
-def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)    
-
 
 #declares intents of the bot
 intents = discord.Intents.default()
