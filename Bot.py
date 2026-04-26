@@ -1,5 +1,6 @@
 import discord
 import os
+import json
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
@@ -8,6 +9,20 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 ID = os.getenv("GUILD_ID")
+
+#Creates data file to store input
+DATA_FILE = "data.json"
+#Loads data file entries
+def load_data():
+    if not os.path.exists(DATA_FILE):
+        return {}
+    with open(DATA_FILE, "r") as f:
+        return json.load(f)
+#Saves data file entries
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)    
+
 
 #declares intents of the bot
 intents = discord.Intents.default()
@@ -27,13 +42,51 @@ async def on_ready():
 async def ping_slash(interaction: discord.Interaction):
     await interaction.response.send_message("Pong!")
 
-@bot.command()
-async def ping(ctx):
-    await ctx.send("Pong!")
+#Saves data into data file
+@bot.tree.command(name="save", description="Saves your info", guild=myguild)
+@app_commands.describe(
+    variable1="Description of variable 1",
+    variable2="Description of variable 2"
+)
+async def save(interaction: discord.Interaction, variable1: str, variable2: str):
+    data = load_data()
 
-@bot.command()
-async def hello(ctx):
-    await ctx.send(f"Hello {ctx.author.mention}!")
+    user_id = str(interaction.user.id)
+    data[user_id] = {
+        "mention": interaction.user.mention,
+        "variable1": variable1,
+        "variable2": variable2
+    }
+
+    save_data(data)
+    await interaction.response.send_message(
+        f"Saved! {interaction.user.mention} — `{variable1}`, `{variable2}`",
+        ephemeral=True
+    )
+
+#Deletes data in data file
+@bot.tree.command(name="remove", description="Removes your saved entry", guild=myguild)
+@app_commands.describe(variable1="The variable1 value to remove")
+async def remove(interaction: discord.Interaction, variable1: str):
+    data = load_data()
+
+    found = None
+    for user_id, entry in data.items():
+        if entry["variable1"] == variable1:
+            found = user_id
+            break
+
+    if not found:
+        await interaction.response.send_message(
+            f"No entry found with `{variable1}`.", ephemeral=True
+        )
+        return
+
+    del data[found]
+    save_data(data)
+    await interaction.response.send_message(
+        f"Removed entry for `{variable1}`.", ephemeral=True
+    )
 
 # Run the bot
 bot.run(TOKEN)
