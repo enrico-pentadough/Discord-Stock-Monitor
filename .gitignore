@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+
+# Environment variables (IMPORTANT)
+.env
+*.env
+
+# Config files (if you store tokens here)
+config.json
+
+# OS files
+.DS_Store
+Thumbs.db
